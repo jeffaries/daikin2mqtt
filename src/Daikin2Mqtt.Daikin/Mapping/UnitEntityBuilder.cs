@@ -19,7 +19,7 @@ public sealed partial class UnitEntityBuilder
         "climate", "indoor_temperature", "outdoor_temperature", "indoor_humidity", "compressor_frequency", "error_code",
         "wifi_rssi", "special_mode", "today_runtime", "energy_today", "energy_today_heat", "energy_today_cool", "energy_week",
         "energy_month", "energy_month_heat", "energy_month_cool", "energy_year", "energy_year_heat", "energy_year_cool",
-        "alert", "compressor_running", "holiday_mode", "firmware", "mac", "ip",
+        "alert", "compressor_running", "holiday_mode", "power", "streamer", "firmware", "mac", "ip",
     };
 
     public static readonly IReadOnlyList<string> ManualComponents = new[] { "sensor", "binary_sensor" };
@@ -166,9 +166,22 @@ public sealed partial class UnitEntityBuilder
             Add("compressor_running", "Compressor", (k, n, _) =>
                 Binary(k, n, s => s.CompressorFrequency is { } hz ? (hz > 0 ? On : Off) : null, "running"));
 
+            Add("power", "Power", (k, n, _) => Switch(unit, k, n, "mdi:power",
+                s => s.Power is { } p ? (p ? On : Off) : null,
+                on => new DaikinCommand { Power = on }));
+
+            if (caps.SpecialMode)
+            {
+                Add("streamer", "Streamer", (k, n, _) => Switch(unit, k, n, "mdi:air-filter",
+                    s => s.Control.TryGetValue("adv", out var adv) ? (DaikinValues.StreamerActive(adv) ? On : Off) : null,
+                    on => new DaikinCommand { Streamer = on }));
+            }
+
             if (info.SupportsHoliday)
             {
-                Add("holiday_mode", "Holiday mode", (k, n, _) => HolidaySwitch(unit, k, n));
+                Add("holiday_mode", "Holiday mode", (k, n, _) => Switch(unit, k, n, "mdi:beach",
+                    s => s.Basic.TryGetValue("en_hol", out var hol) ? (hol == "1" ? On : Off) : null,
+                    on => new DaikinCommand { Holiday = on }));
             }
 
             AddEnergy(info, Add, Sensor);
@@ -320,7 +333,9 @@ public sealed partial class UnitEntityBuilder
             commands);
     }
 
-    private MappedEntity HolidaySwitch(DaikinUnitOptions unit, string key, string name)
+    private MappedEntity Switch(
+        DaikinUnitOptions unit, string key, string name, string icon,
+        Func<DaikinSnapshot, string?> state, Func<bool, DaikinCommand> command)
     {
         var stateTopic = _topics.Join(unit.Id, key, "state");
         var commandTopic = _topics.Join(unit.Id, key, "set");
@@ -329,15 +344,15 @@ public sealed partial class UnitEntityBuilder
             new ComponentDescriptor
             {
                 Key = key, Platform = "switch", UniqueId = $"{NodeIdOf(unit.Id)}_{key}", Name = name,
-                StateTopic = stateTopic, CommandTopic = commandTopic, Icon = "mdi:beach",
+                StateTopic = stateTopic, CommandTopic = commandTopic, Icon = icon,
             },
-            new[] { new StateBinding(stateTopic, s => s.Basic.TryGetValue("en_hol", out var hol) ? (hol == "1" ? On : Off) : null) },
+            new[] { new StateBinding(stateTopic, state) },
             new[]
             {
                 new CommandBinding(commandTopic, payload => payload.Trim().ToUpperInvariant() switch
                 {
-                    "ON" => new DaikinCommand { Holiday = true },
-                    "OFF" => new DaikinCommand { Holiday = false },
+                    "ON" => command(true),
+                    "OFF" => command(false),
                     _ => null,
                 }),
             });

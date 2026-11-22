@@ -100,6 +100,10 @@ public static class DaikinValues
         };
     }
 
+    /// <summary>True when <c>adv</c> contains the streamer (13), alone or with another mode ("2/13").</summary>
+    public static bool StreamerActive(string? adv) =>
+        adv is not null && adv.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Contains(PresetToDaikin("streamer"));
+
     /// <summary>Climate preset published for the special mode of <c>adv</c>: powerful is "boost", eco is "eco", anything else "none".</summary>
     public static string ClimatePresetOfAdv(string? adv) => PresetToHa(adv) switch
     {

@@ -78,7 +78,7 @@ percentage. `alert`: `255` = no alert.
 ## Special modes (not in the upstream documentation)
 
 Taken from the pydaikin library used by Home Assistant: `GET aircon/set_special_mode?spmode_kind={1|2}&set_spmode={0|1}`
-(`spmode_kind` 1 = powerful, 2 = economy). The streamer uses `en_streamer={0|1}` and is not implemented. Not verified
+(`spmode_kind` 1 = powerful, 2 = economy). The streamer uses `aircon/set_special_mode?en_streamer={0|1}`. Not verified
 on a real unit by this project.
 
 ## Not documented (hence not implemented)

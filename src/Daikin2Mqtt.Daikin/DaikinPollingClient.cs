@@ -147,6 +147,12 @@ public sealed class DaikinPollingClient : IDaikinClient
             _logger.LogInformation("Unit {Unit}: holiday mode {State}", Unit.Id, holiday ? "on" : "off");
         }
 
+        if (command.Streamer is { } streamer)
+        {
+            await _api.SetStreamerAsync(streamer, ct).ConfigureAwait(false);
+            _logger.LogInformation("Unit {Unit}: streamer {State}", Unit.Id, streamer ? "on" : "off");
+        }
+
         foreach (var mode in command.SpecialModes ?? Array.Empty<SpecialModeChange>())
         {
             try

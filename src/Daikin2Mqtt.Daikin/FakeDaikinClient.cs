@@ -162,6 +162,11 @@ public sealed class FakeDaikinClient : IDaikinClient
                 _basic["en_hol"] = holiday ? "1" : "0";
             }
 
+            if (command.Streamer is { } streamer)
+            {
+                _control["adv"] = streamer ? "13" : string.Empty;
+            }
+
             foreach (var mode in command.SpecialModes ?? Array.Empty<SpecialModeChange>())
             {
                 var adv = mode.Kind == "1" ? "2" : "12";

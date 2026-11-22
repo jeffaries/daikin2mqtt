@@ -110,6 +110,19 @@ public sealed class DaikinHttpApi
         }
     }
 
+    public async Task SetStreamerAsync(bool enabled, CancellationToken ct)
+    {
+        await _commands.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            await GetAsync($"aircon/set_special_mode?en_streamer={(enabled ? 1 : 0)}", ct).ConfigureAwait(false);
+        }
+        finally
+        {
+            _commands.Release();
+        }
+    }
+
     /// <summary>One request: serialised per unit, retried on network errors, answer checked (<c>ret=OK</c>).</summary>
     private async Task<IReadOnlyDictionary<string, string>> GetAsync(string pathAndQuery, CancellationToken ct)
     {

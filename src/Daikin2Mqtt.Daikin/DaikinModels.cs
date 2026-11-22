@@ -225,6 +225,9 @@ public sealed record DaikinCommand
 
     public bool? Holiday { get; init; }
 
+    /// <summary>Streamer on or off (<c>aircon/set_special_mode?en_streamer</c>).</summary>
+    public bool? Streamer { get; init; }
+
     /// <summary>Special modes to switch (<c>aircon/set_special_mode</c>).</summary>
     public IReadOnlyList<SpecialModeChange>? SpecialModes { get; init; }
 
@@ -239,6 +242,7 @@ public sealed record DaikinCommand
             FanRate is { } f ? $"f_rate={f}" : null,
             SwingDirection is { } d ? $"f_dir={d}" : null,
             Holiday is { } h ? $"en_hol={(h ? 1 : 0)}" : null,
+            Streamer is { } st ? $"en_streamer={(st ? 1 : 0)}" : null,
             SpecialModes is { } modes ? string.Join(' ', modes.Select(m => $"spmode_kind={m.Kind}:{(m.On ? 1 : 0)}")) : null,
         }.Where(s => s is not null));
 }

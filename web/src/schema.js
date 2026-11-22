@@ -65,7 +65,7 @@ export const defaultEntityKeys = [
   'climate', 'indoor_temperature', 'outdoor_temperature', 'indoor_humidity', 'compressor_frequency', 'error_code',
   'wifi_rssi', 'special_mode', 'today_runtime', 'energy_today', 'energy_today_heat', 'energy_today_cool', 'energy_week',
   'energy_month', 'energy_month_heat', 'energy_month_cool', 'energy_year', 'energy_year_heat', 'energy_year_cool',
-  'alert', 'compressor_running', 'holiday_mode', 'firmware', 'mac', 'ip',
+  'alert', 'compressor_running', 'holiday_mode', 'power', 'streamer', 'firmware', 'mac', 'ip',
 ]
 
 export function getPath(obj, path) {

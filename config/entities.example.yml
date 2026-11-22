@@ -20,6 +20,8 @@
 #   wifi_rssi             puissance du signal Wi-Fi (diagnostic)
 #   special_mode          mode spécial en cours : none, powerful, eco, streamer (lecture seule, si l'unité en a)
 #   holiday_mode          mode vacances (switch)
+#   power                 marche/arrêt (switch)
+#   streamer              streamer (switch)
 #   firmware, mac, ip     diagnostic
 #   today_runtime         minutes de fonctionnement aujourd'hui           } si Daikin.EnableEnergy: true et si l'unité
 #   energy_today(_heat|_cool), energy_week,                              } répond aux requêtes d'énergie.

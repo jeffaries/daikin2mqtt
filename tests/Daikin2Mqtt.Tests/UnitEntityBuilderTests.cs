@@ -333,6 +333,35 @@ public class UnitEntityBuilderTests
     }
 
     [Fact]
+    public void PowerSwitch_FollowsAndSetsThePower()
+    {
+        var power = Entity(Builder().Build(Info()), "power");
+
+        Assert.Equal("switch", power.Component.Platform);
+        Assert.Equal("ON", State(power, Snapshot(), "/state"));
+        Assert.Equal("OFF", State(power, Snapshot(new() { ["pow"] = "0" }), "/state"));
+        Assert.True(power.Commands.Single().Parse("ON")!.Power);
+        Assert.False(power.Commands.Single().Parse("OFF")!.Power);
+    }
+
+    [Fact]
+    public void StreamerSwitch_FollowsAndSetsTheStreamer()
+    {
+        var entities = Builder().Build(Info());
+        var streamer = Entity(entities, "streamer");
+
+        Assert.Equal("OFF", State(streamer, Snapshot(new() { ["adv"] = "" }), "/state"));
+        Assert.Equal("ON", State(streamer, Snapshot(new() { ["adv"] = "13" }), "/state"));
+        Assert.Equal("ON", State(streamer, Snapshot(new() { ["adv"] = "2/13" }), "/state"));
+        Assert.Equal("OFF", State(streamer, Snapshot(new() { ["adv"] = "2" }), "/state"));
+        Assert.True(streamer.Commands.Single().Parse("ON")!.Streamer);
+        Assert.False(streamer.Commands.Single().Parse("OFF")!.Streamer);
+
+        var noSpecial = DaikinCapabilities.Parse(new Dictionary<string, string> { ["en_spmode"] = "0" });
+        Assert.DoesNotContain(Builder().Build(Info(noSpecial)), e => e.Key == "streamer");
+    }
+
+    [Fact]
     public void HolidaySwitch_FollowsAndSetsTheHolidayMode()
     {
         var holiday = Entity(Builder().Build(Info()), "holiday_mode");
