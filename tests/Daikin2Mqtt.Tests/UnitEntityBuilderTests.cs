@@ -24,7 +24,7 @@ public class UnitEntityBuilderTests
         unit ?? Salon, "Daikin", "A1B2C3D4E5F6", "1_14_88",
         caps ?? DaikinCapabilities.Parse(new Dictionary<string, string>
         {
-            ["model"] = "0B66", ["type"] = "N", ["en_frate"] = "1", ["s_fdir"] = "1", ["temp"] = "1", ["s_humd"] = "1", ["en_spmode"] = "1",
+            ["model"] = "0B66", ["type"] = "N", ["en_frate"] = "1", ["s_fdir"] = "3", ["temp"] = "1", ["s_humd"] = "1", ["en_spmode"] = "1",
         }),
         energy, holiday);
 
@@ -161,6 +161,25 @@ public class UnitEntityBuilderTests
     public void Climate_WithoutHolidaySupportHasNoPreset()
     {
         Assert.Null(Discovery(Builder().Build(Info(holiday: false)), "climate")["preset_modes"]);
+    }
+
+    [Theory]
+    [InlineData("3", "off,vertical,horizontal,both")]
+    [InlineData("1", "off,vertical")]
+    [InlineData("2", "off,horizontal")]
+    public void Climate_SwingModesFollowTheAxesOfTheUnit(string sFdir, string expected)
+    {
+        var caps = DaikinCapabilities.Parse(new Dictionary<string, string> { ["en_fdir"] = "1", ["s_fdir"] = sFdir });
+        var climate = Discovery(Builder().Build(Info(caps)), "climate");
+
+        Assert.Equal(expected, string.Join(",", climate["swing_modes"]!.AsArray().Select(n => (string)n!)));
+    }
+
+    [Fact]
+    public void Capabilities_SwingIsOffOnlyWhenSFdirIsZero()
+    {
+        Assert.True(DaikinCapabilities.Parse(new Dictionary<string, string> { ["s_fdir"] = "3" }).Swing);
+        Assert.False(DaikinCapabilities.Parse(new Dictionary<string, string> { ["s_fdir"] = "0" }).Swing);
     }
 
     [Fact]

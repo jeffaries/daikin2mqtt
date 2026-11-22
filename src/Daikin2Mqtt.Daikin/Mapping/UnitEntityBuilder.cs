@@ -266,7 +266,9 @@ public sealed partial class UnitEntityBuilder
             states.Add(new StateBinding(T("swing_mode", "state"), s => DaikinValues.SwingToHa(s.Control.GetValueOrDefault("f_dir"))));
             commands.Add(new CommandBinding(T("swing_mode", "set"), payload =>
                 DaikinValues.SwingToDaikin(payload) is { } swing ? new DaikinCommand { SwingDirection = swing } : null));
-            extra["swing_modes"] = DaikinValues.SwingModes;
+            extra["swing_modes"] = DaikinValues.SwingModes
+                .Where(m => caps.SwingAxes == 3 || m == "off" || (caps.SwingAxes == 1 && m == "vertical") || (caps.SwingAxes == 2 && m == "horizontal"))
+                .ToArray();
             extra["swing_mode_state_topic"] = T("swing_mode", "state");
             extra["swing_mode_command_topic"] = T("swing_mode", "set");
         }

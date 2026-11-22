@@ -238,8 +238,7 @@ dotnet run --project src/Daikin2Mqtt.Service    # Daikin__Fake=true for simulate
 - **Special modes (powerful, eco, streamer) are read-only**: the upstream API documentation has no endpoint to change
   them, so `special_mode` is a sensor and the climate has no preset modes. No LED switch for the same reason.
 - **Target humidity is not exposed** (`humd` is read but unused); the humidity sensor is.
-- **Swing**: when `s_fdir` is `1` all four swing modes are offered; a unit that only swings vertically may refuse
-  `horizontal` / `both`.
+- **Swing**: `s_fdir` gives the swing axes (1 vertical, 2 horizontal, 3 both) and only the matching modes are offered.
 - **Temperature range**: the module does not report it; defaults 10-32 °C, adjustable per unit.
 - **Polling latency**: up to `Polling.IntervalSeconds` for a change made on the remote control to reach Home Assistant.
 - **Energy**: the 7-day, monthly and yearly figures depend on how the module orders its lists; `energy_week` is the sum of

@@ -17,6 +17,8 @@ public sealed record DaikinCapabilities
 
     /// <summary><c>s_fdir</c> (or <c>en_fdir</c> when absent): the swing direction can be set.</summary>
     public bool Swing { get; init; } = true;
+    /// <summary>Swing axes the unit has (<c>s_fdir</c>): 1 vertical, 2 horizontal, 3 both.</summary>
+    public int SwingAxes { get; init; } = 3;
 
     /// <summary><c>humd</c>: target humidity (not exposed yet).</summary>
     public bool HumidityControl { get; init; }
@@ -49,7 +51,11 @@ public sealed record DaikinCapabilities
         bool Flag(string key, bool whenMissing) =>
             model.TryGetValue(key, out var value) ? value.Trim() == "1" : whenMissing;
 
-        var swing = model.ContainsKey("s_fdir") ? Flag("s_fdir", true) : Flag("en_fdir", true);
+        // s_fdir is not a flag: 0 none, 1 vertical only, 2 horizontal only, 3 both.
+        var swingAxes = model.TryGetValue("s_fdir", out var fdir) && int.TryParse(fdir.Trim(), out var axes)
+            ? axes
+            : (Flag("en_fdir", true) ? 3 : 0);
+        var swing = swingAxes != 0;
         var min = unit?.MinTemperature ?? DefaultMinTemperature;
         var max = unit?.MaxTemperature ?? DefaultMaxTemperature;
         if (max <= min)
@@ -63,6 +69,7 @@ public sealed record DaikinCapabilities
             Type = model.GetValueOrDefault("type"),
             FanRate = Flag("en_frate", true),
             Swing = swing,
+            SwingAxes = swingAxes,
             HumidityControl = Flag("humd", false),
             HumiditySensor = Flag("s_humd", false),
             IndoorTemperature = Flag("temp", true),
