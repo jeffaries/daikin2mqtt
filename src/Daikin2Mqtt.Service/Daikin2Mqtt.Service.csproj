@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>daikin2mqtt-service</UserSecretsId>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Daikin2Mqtt.Core\Daikin2Mqtt.Core.csproj" />
+    <ProjectReference Include="..\Daikin2Mqtt.Daikin\Daikin2Mqtt.Daikin.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+</Project>

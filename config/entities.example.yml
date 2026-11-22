@@ -1,0 +1,78 @@
+# Exemple documenté de entities.yml : copiez ce fichier vers config/entities.yml et adaptez-le.
+# Le dossier config/ est monté dans le conteneur sur /config (voir docker-compose.yml).
+#
+# Tout se trouve dans la liste "Entities", qui contient deux sortes d'entrées :
+#   - avec "Key"  : personnalise une entité publiée automatiquement (Daikin.AutoDiscover: true dans config.yml)
+#   - sans "Key"  : déclare une entité à la main (lit une valeur brute du module)
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Ce qui est publié automatiquement, par unité (selon ce que le module indique dans get_model_info) :
+#
+#   climate               commande de la clim : mode (off/auto/cool/heat/dry/fan_only), consigne (pas 0,5), ventilation
+#                         (auto, quiet, 1..5) et balayage (off, vertical, horizontal, both) si l'unité les supporte
+#   indoor_temperature    température intérieure (si l'unité a un capteur)
+#   outdoor_temperature   température extérieure
+#   indoor_humidity       humidité intérieure (si l'unité a un capteur d'humidité)
+#   compressor_frequency  fréquence du compresseur en Hz (0 = à l'arrêt)
+#   compressor_running    compresseur en marche (binary_sensor)
+#   alert                 alerte ou erreur active (binary_sensor)
+#   error_code            code d'erreur (diagnostic)
+#   wifi_rssi             puissance du signal Wi-Fi (diagnostic)
+#   special_mode          mode spécial en cours : none, powerful, eco, streamer (lecture seule, si l'unité en a)
+#   holiday_mode          mode vacances (switch)
+#   firmware, mac, ip     diagnostic
+#   today_runtime         minutes de fonctionnement aujourd'hui           } si Daikin.EnableEnergy: true et si l'unité
+#   energy_today(_heat|_cool), energy_week,                              } répond aux requêtes d'énergie.
+#   energy_month(_heat|_cool), energy_year(_heat|_cool)                  } kWh ; energy_week = 7 derniers jours glissants
+#
+# Personnaliser une entité publiée automatiquement (entrée avec Key) :
+#   Key      "<Id de l'unité>.<entité>" : "salon.outdoor_temperature", "chambre.energy_today"...
+#   Name     nom affiché dans Home Assistant. Renommer ne recrée pas l'entité (l'identifiant unique ne change pas).
+#   Area     pièce de l'entité. Home Assistant n'a pas de pièce par entité dans MQTT Discovery, seulement par appareil :
+#            les entités d'une même pièce sont donc regroupées dans un appareil « <nom de l'unité> - <pièce> »
+#            (suggested_area, rattaché à l'appareil principal). Sans Area, l'entité reste dans l'appareil de l'unité
+#            (dont la pièce est Daikin.Units[].Area). La pièce n'est suggérée qu'à la création de l'appareil.
+#   Enabled  false = l'entité n'est pas publiée.
+# ---------------------------------------------------------------------------------------------------------------------
+Entities:
+  - { Key: "salon.outdoor_temperature", Name: Température extérieure, Area: Terrasse }   # renommer + pièce
+  - { Key: "salon.firmware", Enabled: false }                                            # ne pas publier
+  - { Key: "salon.energy_week", Name: Consommation 7 jours }
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Entités déclarées à la main (sans Key) : un sensor ou un binary_sensor qui lit une valeur brute d'une réponse du module.
+#
+#   UnitId       (obligatoire) Id de l'unité (voir Daikin.Units dans config.yml)
+#   Id           (obligatoire) libellé utilisé dans le topic <BaseTopic>/<UnitId>/<Id>/state : lettres, chiffres, "_" et "-"
+#   Name         (obligatoire) nom affiché dans Home Assistant
+#   Component    (obligatoire) sensor | binary_sensor
+#   Source       (obligatoire) quelle réponse du module contient la valeur :
+#                  control  aircon/get_control_info  (pow, mode, stemp, dt1..dt7, dh*, f_rate, f_dir, adv, alert...)
+#                  sensor   aircon/get_sensor_info   (htemp, hhum, otemp, err, cmpfreq)
+#                  basic    common/basic_info        (ver, mac, radio1, led, en_hol, err...)
+#   Field        (obligatoire) la clé à lire dans cette réponse
+#   DeviceClass, Icon, Area   classe d'appareil / icône / pièce Home Assistant (optionnels)
+#   Unit, StateClass, Decimals  (sensor) unité, classe d'état (measurement, total...), décimales publiées
+#   Invert       (binary_sensor) true = ON quand la valeur est 0 / off
+#   Enabled      false = ne pas publier
+#
+# Les valeurs sont celles du module : voir docs/daikin-api.md. Une valeur absente ou "-" n'est pas publiée.
+# ---------------------------------------------------------------------------------------------------------------------
+  - UnitId: salon
+    Id: cool_target
+    Name: Consigne mémorisée en froid
+    Component: sensor
+    Source: control
+    Field: dt3                # température mémorisée par l'unité pour le mode froid
+    Unit: "°C"
+    DeviceClass: temperature
+    StateClass: measurement
+    Decimals: 1
+
+  - UnitId: salon
+    Id: led
+    Name: LED du module Wi-Fi
+    Component: binary_sensor
+    Source: basic
+    Field: led
+    Icon: mdi:led-on

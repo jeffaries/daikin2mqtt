@@ -29,7 +29,7 @@ public sealed class FakeDaikinClient : IDaikinClient
     {
         Unit = unit;
         var mac = string.Concat(unit.Id.Select(c => ((int)c % 256).ToString("X2"))).PadRight(12, '0')[..12];
-        Info = new DaikinUnitInfo(
+        Identity = new DaikinUnitInfo(
             unit,
             unit.Name ?? unit.Id,
             mac,
@@ -45,7 +45,11 @@ public sealed class FakeDaikinClient : IDaikinClient
 
     public bool IsAvailable => _available;
 
-    public DaikinUnitInfo? Info { get; set; }
+    /// <summary>Null until <see cref="Connect"/>: like a real unit, the fake has no identity before it has answered.</summary>
+    public DaikinUnitInfo? Info { get; private set; }
+
+    /// <summary>What <see cref="Info"/> becomes once the unit has answered; tests may change it before <see cref="Connect"/>.</summary>
+    public DaikinUnitInfo Identity { get; set; }
 
     public DaikinSnapshot? Snapshot
     {
@@ -93,7 +97,8 @@ public sealed class FakeDaikinClient : IDaikinClient
     /// <summary>The unit answers: identity, first state, then available.</summary>
     public void Connect()
     {
-        InfoAvailable?.Invoke(Info!);
+        Info = Identity;
+        InfoAvailable?.Invoke(Identity);
         Publish();
         SetAvailable(true);
     }

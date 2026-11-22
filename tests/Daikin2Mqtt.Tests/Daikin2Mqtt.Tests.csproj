@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Daikin2Mqtt.Core\Daikin2Mqtt.Core.csproj" />
     <ProjectReference Include="..\..\src\Daikin2Mqtt.Daikin\Daikin2Mqtt.Daikin.csproj" />
+    <ProjectReference Include="..\..\src\Daikin2Mqtt.Service\Daikin2Mqtt.Service.csproj" />
   </ItemGroup>
 
 </Project>

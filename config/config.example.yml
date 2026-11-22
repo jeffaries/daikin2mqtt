@@ -1,0 +1,50 @@
+# Exemple de config.yml : copiez ce fichier vers config/config.yml (ignoré par git) et adaptez les valeurs.
+# Le dossier config/ est monté dans le conteneur sur /config (voir docker-compose.yml).
+# Toutes les clés sont optionnelles : celles omises prennent la valeur par défaut indiquée.
+# Chaque clé peut aussi être surchargée par une variable d'environnement : Section__Cle (ex. Mqtt__Host, Daikin__Units__0__Host).
+
+Mqtt:
+  Host: mosquitto              # nom du service du docker-compose, ou adresse de votre broker (défaut : localhost)
+  Port: 1883
+  Username: ""                 # vide = connexion anonyme
+  Password: ""
+  # UseTls: false
+  ClientId: daikin2mqtt        # doit être unique par instance
+  BaseTopic: daikin            # préfixe de tous les topics : <BaseTopic>/<unité>/...
+
+Discovery:
+  Prefix: homeassistant        # préfixe de découverte de Home Assistant
+
+Device:
+  NodeId: daikin               # préfixe des identifiants : l'appareil d'une unité s'appelle <NodeId>_<Id de l'unité>
+                               # lettres, chiffres, "_" et "-" ; unique par instance de daikin2mqtt
+  Manufacturer: Daikin
+  # Le nom, le modèle et la version de chaque appareil sont lus dans le module Wi-Fi (basic_info / get_model_info)
+  # quand "Name" n'est pas renseigné sur l'unité.
+
+Daikin:
+  AutoDiscover: true           # publie toutes les entités supportées par chaque unité (adaptées à ses capacités)
+  RequestTimeoutSeconds: 10
+  OfflineGraceSeconds: 30      # délai sans réponse avant de déclarer l'unité hors ligne (availability offline)
+  EnableEnergy: true           # capteurs d'énergie et de temps de fonctionnement (false = aucune requête d'énergie)
+  # Fake: false                # true = unités simulées (salon, chambre) pour voir les entités dans Home Assistant sans matériel
+  # RequestRetries: 2          # nouvelles tentatives (délai doublé à chaque fois) après une erreur réseau
+  # RetryDelayMilliseconds: 500
+  # ScanTimeoutSeconds: 3      # durée d'écoute du bouton « Scanner le réseau » de l'interface web
+  Polling:                     # le module n'a pas de push : l'état est lu périodiquement
+    IntervalSeconds: 15        # contrôle + capteurs
+    EnergyIntervalSeconds: 300 # énergie : beaucoup plus rarement
+  Units:                       # une unité = un appareil Home Assistant. Plusieurs unités possibles.
+    - Id: salon                # obligatoire : lettres, chiffres, "_" et "-" (sert dans les topics et les identifiants)
+      Host: 192.168.1.60       # obligatoire : adresse IP du module Wi-Fi (ou nom d'hôte, éventuellement :port)
+      Name: Clim salon         # nom dans Home Assistant (défaut : nom enregistré dans le module, sinon l'Id)
+      Area: Salon              # pièce suggérée de l'appareil
+      # MinTemperature: 16     # bornes du curseur de consigne (le module ne les indique pas ; défauts 10 et 32)
+      # MaxTemperature: 30
+    # - { Id: chambre, Host: 192.168.1.61, Name: Clim chambre, Area: Chambre }
+
+Web:                           # interface web de configuration
+  Enabled: true
+  Port: 8080
+  # Username: admin
+  Password: ""                 # vide = pas d'authentification : définissez-le si le port est accessible
