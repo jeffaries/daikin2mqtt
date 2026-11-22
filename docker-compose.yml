@@ -12,8 +12,6 @@ services:
     image: daikin2mqtt:latest
     container_name: daikin2mqtt
     restart: unless-stopped
-    depends_on:
-      - mosquitto
     # Variables d'environnement facultatives : elles l'emportent sur les fichiers de config.
     env_file:
       - path: .env
@@ -22,7 +20,7 @@ services:
       # Toute la configuration : config.yml (MQTT, unités Daikin, appareil) et entities.yml (entités personnalisées).
       # Pas en :ro : l'interface web les modifie. Le conteneur tourne en utilisateur non-root (uid 1654) : sous Linux,
       # le dossier doit lui être accessible en écriture (sudo chown -R 1654 config).
-      - ./config:/config
+      - ${CONFIG_DIR:./config}:/config
     ports:
       - "${PUBLIC_PORT:-8080}:8080"   # interface web de configuration (Web.Port ; protégez-la avec Web.Password dans config.yml)
     # Le scan réseau de l'interface web (broadcast UDP, port 30050) ne traverse pas le réseau « bridge » de Docker.
@@ -30,15 +28,3 @@ services:
     #   network_mode: host     (et Mqtt.Host: localhost, Web.Port: ${PUBLIC_PORT} ; "ports" et "depends_on" sont alors à retirer)
     # Sinon, saisissez simplement l'adresse IP de chaque unité dans l'onglet « Unités ».
 
-  mosquitto:
-    image: eclipse-mosquitto:2
-    container_name: mosquitto
-    restart: unless-stopped
-    volumes:
-      - ./docker/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
-      - mosquitto-data:/mosquitto/data
-    ports:
-      - "${MQTT_PORT:-1883}:1883"     # pour Home Assistant, MQTT Explorer...
-
-volumes:
-  mosquitto-data:
