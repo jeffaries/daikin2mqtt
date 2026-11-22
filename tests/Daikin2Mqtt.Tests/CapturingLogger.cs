@@ -6,6 +6,8 @@ public sealed class CapturingLogger : ILogger
 {
     public List<string> Warnings { get; } = new();
 
+    public List<string> Errors { get; } = new();
+
     public IDisposable? BeginScope<TState>(TState state)
         where TState : notnull => null;
 
@@ -16,6 +18,10 @@ public sealed class CapturingLogger : ILogger
         if (logLevel == LogLevel.Warning)
         {
             Warnings.Add(formatter(state, exception));
+        }
+        else if (logLevel == LogLevel.Error)
+        {
+            Errors.Add(formatter(state, exception));
         }
     }
 }
