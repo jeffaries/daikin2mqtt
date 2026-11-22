@@ -112,7 +112,7 @@ with two kinds of entries.
 
 | Key | Platform | Notes |
 |---|---|---|
-| `climate` | climate | modes `off/auto/cool/heat/dry/fan_only`, target (0.5 step), current temperature, fan `auto/quiet/1..5`, swing `off/vertical/horizontal/both` (only what the unit supports) |
+| `climate` | climate | modes `off/heat_cool/cool/heat/dry/fan_only`, target (0.5 step), current temperature, fan `auto/quiet/1..5`, swing `off/vertical/horizontal/both`, preset `away/none` = holiday mode (only what the unit supports) |
 | `indoor_temperature`, `outdoor_temperature`, `indoor_humidity` | sensor | humidity only if the unit has the sensor |
 | `compressor_frequency` | sensor | Hz, `0` when idle (the module reports 999) |
 | `compressor_running`, `alert` | binary_sensor | |
@@ -164,11 +164,12 @@ Other fields: `Area`, `Icon`, `Invert` (binary_sensor), `Enabled`. Missing or `-
 |---|---|---|
 | `<BaseTopic>/status` | → | `online` / `offline` (bridge, Last Will) |
 | `<BaseTopic>/<u>/status` | → | `online` / `offline` (unit) |
-| `<BaseTopic>/<u>/climate/mode/state` · `/set` | ↔ | `off auto cool heat dry fan_only` |
+| `<BaseTopic>/<u>/climate/mode/state` · `/set` | ↔ | `off heat_cool cool heat dry fan_only` |
 | `<BaseTopic>/<u>/climate/temperature/state` · `/set` | ↔ | `22.5` (°C) |
 | `<BaseTopic>/<u>/climate/current_temperature/state` | → | `24.0` |
 | `<BaseTopic>/<u>/climate/fan_mode/state` · `/set` | ↔ | `auto quiet 1 2 3 4 5` |
 | `<BaseTopic>/<u>/climate/swing_mode/state` · `/set` | ↔ | `off vertical horizontal both` |
+| `<BaseTopic>/<u>/climate/preset_mode/state` · `/set` | ↔ | `away` / `none` (holiday mode, `en_hol`) |
 | `<BaseTopic>/<u>/<entity>/state` | → | sensors, binary sensors (`ON`/`OFF`) |
 | `<BaseTopic>/<u>/holiday_mode/state` · `/set` | ↔ | `ON` / `OFF` |
 | `<prefix>/device/<NodeId>_<u>/config` | → | discovery (retained) |

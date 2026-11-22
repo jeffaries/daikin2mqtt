@@ -13,7 +13,7 @@ public static class DaikinValues
 
     private static readonly Row[] ModeRows =
     {
-        new("auto", new[] { "1", "0", "7" }),
+        new("heat_cool", new[] { "1", "0", "7" }),
         new("dry", new[] { "2" }),
         new("cool", new[] { "3" }),
         new("heat", new[] { "4" }),
@@ -61,6 +61,9 @@ public static class DaikinValues
     public static IReadOnlyList<string> FanModes { get; } = FanRows.Select(r => r.Ha).ToArray();
 
     public static IReadOnlyList<string> SwingModes { get; } = SwingRows.Select(r => r.Ha).ToArray();
+
+    /// <summary>Presets of the climate entity: "away" is the holiday mode of the unit (<c>en_hol</c>).</summary>
+    public static IReadOnlyList<string> ClimatePresets { get; } = new[] { "away", "none" };
 
     public static IReadOnlyList<string> PresetModes { get; } = PresetRows.Select(r => r.Ha).ToArray();
 

@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------------------------------------------------
 # Ce qui est publié automatiquement, par unité (selon ce que le module indique dans get_model_info) :
 #
-#   climate               commande de la clim : mode (off/auto/cool/heat/dry/fan_only), consigne (pas 0,5), ventilation
+#   climate               commande de la clim : mode (off/heat_cool/cool/heat/dry/fan_only), consigne (pas 0,5), ventilation
 #                         (auto, quiet, 1..5) et balayage (off, vertical, horizontal, both) si l'unité les supporte
 #   indoor_temperature    température intérieure (si l'unité a un capteur)
 #   outdoor_temperature   température extérieure

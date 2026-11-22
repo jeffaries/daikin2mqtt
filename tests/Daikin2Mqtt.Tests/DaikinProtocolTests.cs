@@ -104,7 +104,7 @@ public class DaikinResponseParserTests
 
 public class DaikinValuesTests
 {
-    public static IEnumerable<object[]> HaModes() => new[] { "auto", "dry", "cool", "heat", "fan_only" }.Select(m => new object[] { m });
+    public static IEnumerable<object[]> HaModes() => new[] { "heat_cool", "dry", "cool", "heat", "fan_only" }.Select(m => new object[] { m });
 
     [Theory]
     [MemberData(nameof(HaModes))]
@@ -112,9 +112,9 @@ public class DaikinValuesTests
         Assert.Equal(ha, DaikinValues.ModeToHa(DaikinValues.ModeToDaikin(ha)));
 
     [Theory]
-    [InlineData("0", "auto")]
-    [InlineData("1", "auto")]
-    [InlineData("7", "auto")]
+    [InlineData("0", "heat_cool")]
+    [InlineData("1", "heat_cool")]
+    [InlineData("7", "heat_cool")]
     [InlineData("2", "dry")]
     [InlineData("3", "cool")]
     [InlineData("4", "heat")]
@@ -129,7 +129,7 @@ public class DaikinValuesTests
     [Fact]
     public void Modes_AutoIsSentAsOne()
     {
-        Assert.Equal("1", DaikinValues.ModeToDaikin("auto"));
+        Assert.Equal("1", DaikinValues.ModeToDaikin("heat_cool"));
         Assert.Null(DaikinValues.ModeToDaikin("off"));
         Assert.Null(DaikinValues.ModeToHa("5"));
     }
@@ -189,7 +189,7 @@ public class DaikinValuesTests
 
     [Fact]
     public void HvacModes_ListOffFirst() =>
-        Assert.Equal(new[] { "off", "auto", "dry", "cool", "heat", "fan_only" }, DaikinValues.HvacModes);
+        Assert.Equal(new[] { "off", "heat_cool", "dry", "cool", "heat", "fan_only" }, DaikinValues.HvacModes);
 }
 
 public class DaikinControlRequestTests

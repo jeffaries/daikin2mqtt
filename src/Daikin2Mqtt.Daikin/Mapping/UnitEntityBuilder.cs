@@ -128,7 +128,7 @@ public sealed partial class UnitEntityBuilder
 
         if (_options.AutoDiscover)
         {
-            Add("climate", "Climate", (key, name, _) => Climate(unit, caps, key, name));
+            Add("climate", "Climate", (key, name, _) => Climate(unit, caps, info.SupportsHoliday, key, name));
 
             if (caps.IndoorTemperature)
             {
@@ -205,7 +205,7 @@ public sealed partial class UnitEntityBuilder
 
     // ---- climate -----------------------------------------------------------------------------------------------------
 
-    private MappedEntity Climate(DaikinUnitOptions unit, DaikinCapabilities caps, string key, string name)
+    private MappedEntity Climate(DaikinUnitOptions unit, DaikinCapabilities caps, bool supportsHoliday, string key, string name)
     {
         string T(string attribute, string kind) => _topics.Join(unit.Id, key, attribute, kind);
 
@@ -269,6 +269,21 @@ public sealed partial class UnitEntityBuilder
             extra["swing_modes"] = DaikinValues.SwingModes;
             extra["swing_mode_state_topic"] = T("swing_mode", "state");
             extra["swing_mode_command_topic"] = T("swing_mode", "set");
+        }
+
+        if (supportsHoliday)
+        {
+            states.Add(new StateBinding(T("preset_mode", "state"), s =>
+                s.Basic.TryGetValue("en_hol", out var hol) ? (hol == "1" ? "away" : "none") : null));
+            commands.Add(new CommandBinding(T("preset_mode", "set"), payload => payload.Trim().ToLowerInvariant() switch
+            {
+                "away" => new DaikinCommand { Holiday = true },
+                "none" => new DaikinCommand { Holiday = false },
+                _ => null,
+            }));
+            extra["preset_modes"] = DaikinValues.ClimatePresets;
+            extra["preset_mode_state_topic"] = T("preset_mode", "state");
+            extra["preset_mode_command_topic"] = T("preset_mode", "set");
         }
 
         return new MappedEntity(

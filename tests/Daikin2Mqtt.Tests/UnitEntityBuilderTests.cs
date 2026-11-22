@@ -60,7 +60,7 @@ public class UnitEntityBuilderTests
 
         Assert.Equal("climate", (string?)climate["p"]);
         Assert.Equal("daikin_salon_climate", (string?)climate["unique_id"]);
-        Assert.Equal(new[] { "off", "auto", "dry", "cool", "heat", "fan_only" }, climate["modes"]!.AsArray().Select(n => (string)n!));
+        Assert.Equal(new[] { "off", "heat_cool", "dry", "cool", "heat", "fan_only" }, climate["modes"]!.AsArray().Select(n => (string)n!));
         Assert.Equal(new[] { "auto", "quiet", "1", "2", "3", "4", "5" }, climate["fan_modes"]!.AsArray().Select(n => (string)n!));
         Assert.Equal(new[] { "off", "vertical", "horizontal", "both" }, climate["swing_modes"]!.AsArray().Select(n => (string)n!));
         Assert.Equal(10, (double)climate["min_temp"]!);
@@ -102,7 +102,7 @@ public class UnitEntityBuilderTests
         Assert.Null(climate["fan_mode_command_topic"]);
         Assert.Null(climate["swing_modes"]);
         Assert.Null(climate["current_temperature_topic"]);
-        Assert.Equal(2, Entity(entities, "climate").Commands.Count);
+        Assert.Equal(3, Entity(entities, "climate").Commands.Count);
     }
 
     [Fact]
@@ -134,7 +134,7 @@ public class UnitEntityBuilderTests
     [InlineData("off", false, null)]
     [InlineData("cool", true, "3")]
     [InlineData("heat", true, "4")]
-    [InlineData("auto", true, "1")]
+    [InlineData("heat_cool", true, "1")]
     [InlineData("dry", true, "2")]
     [InlineData("fan_only", true, "6")]
     public void Climate_ModeCommands(string payload, bool power, string? mode)
@@ -146,12 +146,29 @@ public class UnitEntityBuilderTests
         Assert.Null(command.Temperature);
     }
 
+    [Theory]
+    [InlineData("away", true)]
+    [InlineData("none", false)]
+    public void Climate_PresetCommandsDriveTheHolidayMode(string payload, bool holiday)
+    {
+        var command = Entity(Builder().Build(Info()), "climate").Commands.Single(c => c.Topic.EndsWith("preset_mode/set")).Parse(payload)!;
+
+        Assert.Equal(holiday, command.Holiday);
+        Assert.Null(Entity(Builder().Build(Info()), "climate").Commands.Single(c => c.Topic.EndsWith("preset_mode/set")).Parse("eco"));
+    }
+
+    [Fact]
+    public void Climate_WithoutHolidaySupportHasNoPreset()
+    {
+        Assert.Null(Discovery(Builder().Build(Info(holiday: false)), "climate")["preset_modes"]);
+    }
+
     [Fact]
     public void Climate_UnknownPayloadsAreRejected()
     {
         var climate = Entity(Builder().Build(Info()), "climate");
 
-        Assert.Null(climate.Commands.Single(c => c.Topic.EndsWith("/mode/set")).Parse("heat_cool"));
+        Assert.Null(climate.Commands.Single(c => c.Topic.EndsWith("/mode/set")).Parse("auto"));
         Assert.Null(climate.Commands.Single(c => c.Topic.EndsWith("temperature/set")).Parse("warm"));
         Assert.Null(climate.Commands.Single(c => c.Topic.EndsWith("fan_mode/set")).Parse("turbo"));
         Assert.Null(climate.Commands.Single(c => c.Topic.EndsWith("swing_mode/set")).Parse("diagonal"));
