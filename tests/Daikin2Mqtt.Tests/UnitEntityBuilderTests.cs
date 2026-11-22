@@ -146,15 +146,41 @@ public class UnitEntityBuilderTests
         Assert.Null(command.Temperature);
     }
 
-    [Theory]
-    [InlineData("away", true)]
-    [InlineData("none", false)]
-    public void Climate_PresetCommandsDriveTheHolidayMode(string payload, bool holiday)
-    {
-        var command = Entity(Builder().Build(Info()), "climate").Commands.Single(c => c.Topic.EndsWith("preset_mode/set")).Parse(payload)!;
+    private static CommandBinding PresetCommand(DaikinUnitInfo info) =>
+        Entity(Builder().Build(info), "climate").Commands.Single(c => c.Topic.EndsWith("preset_mode/set"));
 
-        Assert.Equal(holiday, command.Holiday);
-        Assert.Null(Entity(Builder().Build(Info()), "climate").Commands.Single(c => c.Topic.EndsWith("preset_mode/set")).Parse("eco"));
+    [Fact]
+    public void Climate_PresetCommandsDriveHolidayAndSpecialModes()
+    {
+        var preset = PresetCommand(Info());
+
+        Assert.Equal(true, preset.Parse("away")!.Holiday);
+        Assert.Null(preset.Parse("away")!.SpecialModes);
+
+        var boost = preset.Parse("boost")!;
+        Assert.Equal(false, boost.Holiday);
+        Assert.Equal(new[] { new SpecialModeChange("1", true) }, boost.SpecialModes);
+
+        var eco = preset.Parse("eco")!;
+        Assert.Equal(new[] { new SpecialModeChange("2", true) }, eco.SpecialModes);
+
+        var none = preset.Parse("none")!;
+        Assert.Equal(false, none.Holiday);
+        Assert.Equal(new[] { new SpecialModeChange("1", false), new SpecialModeChange("2", false) }, none.SpecialModes);
+
+        Assert.Null(preset.Parse("sleep"));
+    }
+
+    [Fact]
+    public void Climate_PresetStateFollowsHolidayAndSpecialMode()
+    {
+        var climate = Entity(Builder().Build(Info()), "climate");
+
+        Assert.Equal("none", State(climate, Snapshot(basic: new() { ["en_hol"] = "0" }), "preset_mode/state"));
+        Assert.Equal("away", State(climate, Snapshot(basic: new() { ["en_hol"] = "1" }), "preset_mode/state"));
+        Assert.Equal("boost", State(climate, Snapshot(new() { ["adv"] = "2" }, basic: new() { ["en_hol"] = "0" }), "preset_mode/state"));
+        Assert.Equal("eco", State(climate, Snapshot(new() { ["adv"] = "12" }, basic: new() { ["en_hol"] = "0" }), "preset_mode/state"));
+        Assert.Equal("away", State(climate, Snapshot(new() { ["adv"] = "2" }, basic: new() { ["en_hol"] = "1" }), "preset_mode/state"));
     }
 
     [Fact]
@@ -162,32 +188,20 @@ public class UnitEntityBuilderTests
     {
         var presets = Discovery(Builder().Build(Info()), "climate")["preset_modes"]!.AsArray().Select(n => (string)n!);
 
-        Assert.Equal(new[] { "away" }, presets);
+        Assert.Equal(new[] { "away", "eco", "boost" }, presets);
     }
 
     [Fact]
-    public void Climate_WithoutHolidaySupportHasNoPreset()
+    public void Climate_PresetsOnlyOfferWhatTheUnitSupports()
     {
-        Assert.Null(Discovery(Builder().Build(Info(holiday: false)), "climate")["preset_modes"]);
-    }
+        var noSpecial = DaikinCapabilities.Parse(new Dictionary<string, string> { ["en_spmode"] = "0" });
+        var onlyHoliday = Discovery(Builder().Build(Info(noSpecial)), "climate")["preset_modes"]!.AsArray().Select(n => (string)n!);
+        Assert.Equal(new[] { "away" }, onlyHoliday);
 
-    [Theory]
-    [InlineData("3", "off,vertical,horizontal,both")]
-    [InlineData("1", "off,vertical")]
-    [InlineData("2", "off,horizontal")]
-    public void Climate_SwingModesFollowTheAxesOfTheUnit(string sFdir, string expected)
-    {
-        var caps = DaikinCapabilities.Parse(new Dictionary<string, string> { ["en_fdir"] = "1", ["s_fdir"] = sFdir });
-        var climate = Discovery(Builder().Build(Info(caps)), "climate");
+        var onlySpecial = Discovery(Builder().Build(Info(holiday: false)), "climate")["preset_modes"]!.AsArray().Select(n => (string)n!);
+        Assert.Equal(new[] { "eco", "boost" }, onlySpecial);
 
-        Assert.Equal(expected, string.Join(",", climate["swing_modes"]!.AsArray().Select(n => (string)n!)));
-    }
-
-    [Fact]
-    public void Capabilities_SwingIsOffOnlyWhenSFdirIsZero()
-    {
-        Assert.True(DaikinCapabilities.Parse(new Dictionary<string, string> { ["s_fdir"] = "3" }).Swing);
-        Assert.False(DaikinCapabilities.Parse(new Dictionary<string, string> { ["s_fdir"] = "0" }).Swing);
+        Assert.Null(Discovery(Builder().Build(Info(noSpecial, holiday: false)), "climate")["preset_modes"]);
     }
 
     [Fact]
@@ -298,8 +312,8 @@ public class UnitEntityBuilderTests
         Assert.Empty(special.Commands);
         Assert.Equal("enum", (string?)Discovery(entities, "special_mode")["device_class"]);
         Assert.Equal("none", State(special, Snapshot(), "/state"));
-        Assert.Equal("powerful", State(special, Snapshot(new() { ["adv"] = "13" }), "/state"));
-        Assert.Equal("streamer", State(special, Snapshot(new() { ["adv"] = "2" }), "/state"));
+        Assert.Equal("powerful", State(special, Snapshot(new() { ["adv"] = "2" }), "/state"));
+        Assert.Equal("streamer", State(special, Snapshot(new() { ["adv"] = "13" }), "/state"));
     }
 
     [Fact]

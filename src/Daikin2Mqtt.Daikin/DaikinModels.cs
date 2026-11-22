@@ -225,6 +225,9 @@ public sealed record DaikinCommand
 
     public bool? Holiday { get; init; }
 
+    /// <summary>Special modes to switch (<c>aircon/set_special_mode</c>).</summary>
+    public IReadOnlyList<SpecialModeChange>? SpecialModes { get; init; }
+
     public bool HasControlChange => Power is not null || Mode is not null || Temperature is not null || FanRate is not null || SwingDirection is not null;
 
     public override string ToString() =>
@@ -236,8 +239,12 @@ public sealed record DaikinCommand
             FanRate is { } f ? $"f_rate={f}" : null,
             SwingDirection is { } d ? $"f_dir={d}" : null,
             Holiday is { } h ? $"en_hol={(h ? 1 : 0)}" : null,
+            SpecialModes is { } modes ? string.Join(' ', modes.Select(m => $"spmode_kind={m.Kind}:{(m.On ? 1 : 0)}")) : null,
         }.Where(s => s is not null));
 }
+
+/// <summary>A special mode to switch on or off: <c>Kind</c> is the Daikin <c>spmode_kind</c> (1 powerful, 2 econo).</summary>
+public sealed record SpecialModeChange(string Kind, bool On);
 
 public class DaikinException : Exception
 {

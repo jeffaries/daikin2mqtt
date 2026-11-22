@@ -112,12 +112,12 @@ with two kinds of entries.
 
 | Key | Platform | Notes |
 |---|---|---|
-| `climate` | climate | modes `off/heat_cool/cool/heat/dry/fan_only`, target (0.5 step), current temperature, fan `auto/quiet/1..5`, swing `off/vertical/horizontal/both`, preset `away/none` = holiday mode (only what the unit supports) |
+| `climate` | climate | modes `off/heat_cool/cool/heat/dry/fan_only`, target (0.5 step), current temperature, fan `auto/quiet/1..5`, swing `off/vertical/horizontal/both`, presets `away` (holiday mode), `eco`, `boost` (powerful), `none` (only what the unit supports) |
 | `indoor_temperature`, `outdoor_temperature`, `indoor_humidity` | sensor | humidity only if the unit has the sensor |
 | `compressor_frequency` | sensor | Hz, `0` when idle (the module reports 999) |
 | `compressor_running`, `alert` | binary_sensor | |
 | `error_code`, `wifi_rssi`, `firmware`, `mac`, `ip` | sensor (diagnostic) | |
-| `special_mode` | sensor (enum) | `none/powerful/eco/streamer`, **read-only** |
+| `special_mode` | sensor (enum) | `none/powerful/eco/streamer`, read-only (eco and powerful are driven by the climate presets) |
 | `holiday_mode` | switch | |
 | `today_runtime` | sensor (min) | with `EnableEnergy` and a unit that answers the energy endpoints |
 | `energy_today`, `energy_month`, `energy_year` (+ `_heat`, `_cool`), `energy_week` | sensor (kWh) | `total_increasing`; `energy_week` is a rolling 7-day window, so it has no state class |
@@ -169,7 +169,8 @@ Other fields: `Area`, `Icon`, `Invert` (binary_sensor), `Enabled`. Missing or `-
 | `<BaseTopic>/<u>/climate/current_temperature/state` | → | `24.0` |
 | `<BaseTopic>/<u>/climate/fan_mode/state` · `/set` | ↔ | `auto quiet 1 2 3 4 5` |
 | `<BaseTopic>/<u>/climate/swing_mode/state` · `/set` | ↔ | `off vertical horizontal both` |
-| `<BaseTopic>/<u>/climate/preset_mode/state` · `/set` | ↔ | `away` / `none` (holiday mode, `en_hol`) |
+| `<BaseTopic>/<u>/climate/preset_mode/state` · `/set` | ↔ | `away` (holiday, `en_hol`) · `eco` / `boost` (`set_special_mode`) · `none` |
+| `<BaseTopic>/<u>/climate/action/state` | → | `off heating cooling drying fan idle` (deduced from the compressor) |
 | `<BaseTopic>/<u>/<entity>/state` | → | sensors, binary sensors (`ON`/`OFF`) |
 | `<BaseTopic>/<u>/holiday_mode/state` · `/set` | ↔ | `ON` / `OFF` |
 | `<prefix>/device/<NodeId>_<u>/config` | → | discovery (retained) |
@@ -235,8 +236,9 @@ dotnet run --project src/Daikin2Mqtt.Service    # Daikin__Fake=true for simulate
 - **Firmware 2.8.0 and newer is not supported** (API `/dsiot/multireq` in JSON). Such a unit answers 404 on the classic
   endpoints: it is reported with a clear error in the log and stays unavailable. Do not update the module if you can
   avoid it.
-- **Special modes (powerful, eco, streamer) are read-only**: the upstream API documentation has no endpoint to change
-  them, so `special_mode` is a sensor and the climate has no preset modes. No LED switch for the same reason.
+- **Special modes**: `eco` and `boost` (powerful) are driven by the climate presets through `aircon/set_special_mode`,
+  an endpoint missing from the upstream documentation but used by Home Assistant's own Daikin integration. The streamer is
+  only read. No LED switch: no known endpoint.
 - **Target humidity is not exposed** (`humd` is read but unused); the humidity sensor is.
 - **Swing**: `s_fdir` gives the swing axes (1 vertical, 2 horizontal, 3 both) and only the matching modes are offered.
 - **Temperature range**: the module does not report it; defaults 10-32 °C, adjustable per unit.

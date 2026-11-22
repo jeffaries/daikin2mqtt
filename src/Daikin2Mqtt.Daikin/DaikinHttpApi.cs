@@ -96,6 +96,20 @@ public sealed class DaikinHttpApi
         }
     }
 
+    /// <summary>Switches a special mode: <paramref name="kind"/> is <c>spmode_kind</c> (1 powerful, 2 econo).</summary>
+    public async Task SetSpecialModeAsync(string kind, bool enabled, CancellationToken ct)
+    {
+        await _commands.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            await GetAsync($"aircon/set_special_mode?spmode_kind={kind}&set_spmode={(enabled ? 1 : 0)}", ct).ConfigureAwait(false);
+        }
+        finally
+        {
+            _commands.Release();
+        }
+    }
+
     /// <summary>One request: serialised per unit, retried on network errors, answer checked (<c>ret=OK</c>).</summary>
     private async Task<IReadOnlyDictionary<string, string>> GetAsync(string pathAndQuery, CancellationToken ct)
     {

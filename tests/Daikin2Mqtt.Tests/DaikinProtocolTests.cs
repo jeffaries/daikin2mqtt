@@ -170,9 +170,9 @@ public class DaikinValuesTests
 
     [Theory]
     [InlineData("none", "")]
-    [InlineData("powerful", "13")]
+    [InlineData("powerful", "2")]
     [InlineData("eco", "12")]
-    [InlineData("streamer", "2")]
+    [InlineData("streamer", "13")]
     public void Presets_MapBothWays(string ha, string adv)
     {
         Assert.Equal(adv, DaikinValues.PresetToDaikin(ha));
@@ -181,11 +181,28 @@ public class DaikinValuesTests
 
     [Theory]
     [InlineData("2/13", "powerful")]
-    [InlineData("12/2", "eco")]
+    [InlineData("12/13", "eco")]
     [InlineData(null, "none")]
     [InlineData("99", null)]
     public void Presets_HandleCombinedAndUnknownValues(string? adv, string? expected) =>
         Assert.Equal(expected, DaikinValues.PresetToHa(adv));
+
+    [Theory]
+    [InlineData(false, "4", 42.0, "off")]
+    [InlineData(true, "4", 42.0, "heating")]
+    [InlineData(true, "4", 0.0, "idle")]
+    [InlineData(true, "3", 30.0, "cooling")]
+    [InlineData(true, "2", 30.0, "drying")]
+    [InlineData(true, "6", 0.0, "fan")]
+    [InlineData(true, "4", null, null)]
+    public void HvacAction_IsDeducedFromTheCompressor(bool power, string mode, double? hz, string? expected) =>
+        Assert.Equal(expected, DaikinValues.HvacAction(power, mode, hz, 20, 22));
+
+    [Theory]
+    [InlineData(18.0, 22.0, "heating")]
+    [InlineData(25.0, 22.0, "cooling")]
+    public void HvacAction_AutoModeFollowsTheRoomTemperature(double room, double target, string expected) =>
+        Assert.Equal(expected, DaikinValues.HvacAction(true, "1", 40, room, target));
 
     [Fact]
     public void HvacModes_ListOffFirst() =>

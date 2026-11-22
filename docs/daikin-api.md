@@ -71,11 +71,16 @@ Holiday mode.
 | `4` | heat | | | | | `3` | both |
 | `6` | fan only | | | | | | |
 
-`adv` (special mode): empty = none, `13` = powerful, `12` = economy, `2` = streamer (some units report several, `2/13`).
+`adv` (special mode): empty = none, `2` = powerful, `12` = economy, `13` = streamer (some units report several, `2/13`).
 `stemp`: `10.0`-`41.0` (0.5 steps on some models), `M` = none (dry), `--` = n/a (fan). `shum`: `0` off, `AUTO` or a
 percentage. `alert`: `255` = no alert.
 
+## Special modes (not in the upstream documentation)
+
+Taken from the pydaikin library used by Home Assistant: `GET aircon/set_special_mode?spmode_kind={1|2}&set_spmode={0|1}`
+(`spmode_kind` 1 = powerful, 2 = economy). The streamer uses `en_streamer={0|1}` and is not implemented. Not verified
+on a real unit by this project.
+
 ## Not documented (hence not implemented)
 
-The upstream documentation lists no endpoint to change the special modes (`adv`), nor the LED: the `special_mode`
-entity is read-only and there is no LED switch. See "Known limitations" in the [README](../README.md).
+The LED has no known endpoint: there is no LED switch. See "Known limitations" in the [README](../README.md).

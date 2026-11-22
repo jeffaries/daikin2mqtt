@@ -43,9 +43,9 @@ public static class DaikinValues
     private static readonly Row[] PresetRows =
     {
         new("none", new[] { string.Empty }),
-        new("powerful", new[] { "13" }),
+        new("powerful", new[] { "2" }),
         new("eco", new[] { "12" }),
-        new("streamer", new[] { "2" }),
+        new("streamer", new[] { "13" }),
     };
 
     /// <summary>Mode numbers of the Daikin API that have no temperature target.</summary>
@@ -62,8 +62,51 @@ public static class DaikinValues
 
     public static IReadOnlyList<string> SwingModes { get; } = SwingRows.Select(r => r.Ha).ToArray();
 
-    /// <summary>Presets of the climate entity: "away" is the holiday mode of the unit (<c>en_hol</c>). "none" is implicit: Home Assistant rejects it inside preset_modes.</summary>
-    public static IReadOnlyList<string> ClimatePresets { get; } = new[] { "away" };
+    /// <summary>
+    /// What the unit is doing (Home Assistant <c>hvac_action</c>): off, heating, cooling, drying, fan or idle. Daikin does not
+    /// report it: it is deduced from the power, the mode and the compressor frequency. In auto mode the direction comes from
+    /// the room temperature against the target. Null when the compressor frequency is unknown.
+    /// </summary>
+    public static string? HvacAction(bool? power, string? daikinMode, double? compressorHz, double? indoor, double? target)
+    {
+        if (power == false)
+        {
+            return "off";
+        }
+
+        var mode = ModeToHa(daikinMode);
+        if (mode == "fan_only")
+        {
+            return "fan";
+        }
+
+        if (compressorHz is null)
+        {
+            return null;
+        }
+
+        if (compressorHz <= 0)
+        {
+            return "idle";
+        }
+
+        return mode switch
+        {
+            "heat" => "heating",
+            "cool" => "cooling",
+            "dry" => "drying",
+            "heat_cool" when indoor is { } room && target is { } goal => room < goal ? "heating" : "cooling",
+            _ => "idle",
+        };
+    }
+
+    /// <summary>Climate preset published for the special mode of <c>adv</c>: powerful is "boost", eco is "eco", anything else "none".</summary>
+    public static string ClimatePresetOfAdv(string? adv) => PresetToHa(adv) switch
+    {
+        "powerful" => "boost",
+        "eco" => "eco",
+        _ => "none",
+    };
 
     public static IReadOnlyList<string> PresetModes { get; } = PresetRows.Select(r => r.Ha).ToArray();
 

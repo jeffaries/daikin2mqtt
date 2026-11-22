@@ -147,6 +147,20 @@ public sealed class DaikinPollingClient : IDaikinClient
             _logger.LogInformation("Unit {Unit}: holiday mode {State}", Unit.Id, holiday ? "on" : "off");
         }
 
+        foreach (var mode in command.SpecialModes ?? Array.Empty<SpecialModeChange>())
+        {
+            try
+            {
+                await _api.SetSpecialModeAsync(mode.Kind, mode.On, ct).ConfigureAwait(false);
+                _logger.LogInformation("Unit {Unit}: special mode {Kind} {State}", Unit.Id, mode.Kind, mode.On ? "on" : "off");
+            }
+            catch (DaikinProtocolException ex) when (!mode.On)
+            {
+                // Switching off a mode that is not active may be refused: the result is the one wanted anyway.
+                _logger.LogDebug("Unit {Unit}: special mode {Kind} off refused: {Reason}", Unit.Id, mode.Kind, ex.Message);
+            }
+        }
+
         // The command worked: tell Home Assistant what the unit now reports, without waiting for the next poll.
         try
         {

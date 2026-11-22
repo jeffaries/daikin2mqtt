@@ -213,6 +213,7 @@ public sealed partial class UnitEntityBuilder
         {
             new(T("mode", "state"), s => DaikinValues.HvacMode(s.Power, s.Mode)),
             new(T("temperature", "state"), s => Number(s.TargetTemperature, 1)),
+            new(T("action", "state"), s => DaikinValues.HvacAction(s.Power, s.Mode, s.CompressorFrequency, s.IndoorTemperature, s.TargetTemperature)),
         };
         var commands = new List<CommandBinding>
         {
@@ -238,6 +239,7 @@ public sealed partial class UnitEntityBuilder
             ["mode_command_topic"] = commands[0].Topic,
             ["temperature_state_topic"] = states[1].Topic,
             ["temperature_command_topic"] = commands[1].Topic,
+            ["action_topic"] = states[2].Topic,
             ["min_temp"] = caps.MinTemperature,
             ["max_temp"] = caps.MaxTemperature,
             ["temp_step"] = 0.5,
@@ -273,17 +275,40 @@ public sealed partial class UnitEntityBuilder
             extra["swing_mode_command_topic"] = T("swing_mode", "set");
         }
 
-        if (supportsHoliday)
+        if (supportsHoliday || caps.SpecialMode)
         {
-            states.Add(new StateBinding(T("preset_mode", "state"), s =>
-                s.Basic.TryGetValue("en_hol", out var hol) ? (hol == "1" ? "away" : "none") : null));
-            commands.Add(new CommandBinding(T("preset_mode", "set"), payload => payload.Trim().ToLowerInvariant() switch
+            var presets = new List<string>();
+            if (supportsHoliday)
             {
-                "away" => new DaikinCommand { Holiday = true },
-                "none" => new DaikinCommand { Holiday = false },
-                _ => null,
+                presets.Add("away");
+            }
+
+            if (caps.SpecialMode)
+            {
+                presets.Add("eco");
+                presets.Add("boost");
+            }
+
+            states.Add(new StateBinding(T("preset_mode", "state"), s =>
+                supportsHoliday && s.Basic.GetValueOrDefault("en_hol") == "1" ? "away" : DaikinValues.ClimatePresetOfAdv(s.Control.GetValueOrDefault("adv"))));
+            commands.Add(new CommandBinding(T("preset_mode", "set"), payload =>
+            {
+                // Leaving a preset: holiday and special modes are exclusive, so the others are switched off.
+                bool? holidayOff = supportsHoliday ? false : null;
+                return payload.Trim().ToLowerInvariant() switch
+                {
+                    "away" when supportsHoliday => new DaikinCommand { Holiday = true },
+                    "boost" when caps.SpecialMode => new DaikinCommand { Holiday = holidayOff, SpecialModes = new[] { new SpecialModeChange("1", true) } },
+                    "eco" when caps.SpecialMode => new DaikinCommand { Holiday = holidayOff, SpecialModes = new[] { new SpecialModeChange("2", true) } },
+                    "none" => new DaikinCommand
+                    {
+                        Holiday = holidayOff,
+                        SpecialModes = caps.SpecialMode ? new[] { new SpecialModeChange("1", false), new SpecialModeChange("2", false) } : null,
+                    },
+                    _ => null,
+                };
             }));
-            extra["preset_modes"] = DaikinValues.ClimatePresets;
+            extra["preset_modes"] = presets;
             extra["preset_mode_state_topic"] = T("preset_mode", "state");
             extra["preset_mode_command_topic"] = T("preset_mode", "set");
         }
