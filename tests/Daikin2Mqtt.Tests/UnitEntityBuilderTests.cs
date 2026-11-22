@@ -158,6 +158,14 @@ public class UnitEntityBuilderTests
     }
 
     [Fact]
+    public void Climate_PresetModesDoNotListNone()
+    {
+        var presets = Discovery(Builder().Build(Info()), "climate")["preset_modes"]!.AsArray().Select(n => (string)n!);
+
+        Assert.Equal(new[] { "away" }, presets);
+    }
+
+    [Fact]
     public void Climate_WithoutHolidaySupportHasNoPreset()
     {
         Assert.Null(Discovery(Builder().Build(Info(holiday: false)), "climate")["preset_modes"]);

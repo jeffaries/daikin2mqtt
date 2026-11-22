@@ -62,8 +62,8 @@ public static class DaikinValues
 
     public static IReadOnlyList<string> SwingModes { get; } = SwingRows.Select(r => r.Ha).ToArray();
 
-    /// <summary>Presets of the climate entity: "away" is the holiday mode of the unit (<c>en_hol</c>).</summary>
-    public static IReadOnlyList<string> ClimatePresets { get; } = new[] { "away", "none" };
+    /// <summary>Presets of the climate entity: "away" is the holiday mode of the unit (<c>en_hol</c>). "none" is implicit: Home Assistant rejects it inside preset_modes.</summary>
+    public static IReadOnlyList<string> ClimatePresets { get; } = new[] { "away" };
 
     public static IReadOnlyList<string> PresetModes { get; } = PresetRows.Select(r => r.Ha).ToArray();
 
