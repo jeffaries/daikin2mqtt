@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+.git/
+.vs/
+.vscode/
+*.md
+docker-compose.yml
+Dockerfile
+**/node_modules/
+src/Daikin2Mqtt.Service/wwwroot/
