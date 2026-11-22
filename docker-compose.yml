@@ -20,7 +20,7 @@ services:
       # Toute la configuration : config.yml (MQTT, unités Daikin, appareil) et entities.yml (entités personnalisées).
       # Pas en :ro : l'interface web les modifie. Le conteneur tourne en utilisateur non-root (uid 1654) : sous Linux,
       # le dossier doit lui être accessible en écriture (sudo chown -R 1654 config).
-      - ${CONFIG_DIR:./config}:/config
+      - "${CONFIG_DIR:-./config}:/config"
     ports:
       - "${PUBLIC_PORT:-8080}:8080"   # interface web de configuration (Web.Port ; protégez-la avec Web.Password dans config.yml)
     # Le scan réseau de l'interface web (broadcast UDP, port 30050) ne traverse pas le réseau « bridge » de Docker.
