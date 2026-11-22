@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daikin2Mqtt.Core", "src\Daikin2Mqtt.Core\Daikin2Mqtt.Core.csproj", "{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daikin2Mqtt.Tests", "tests\Daikin2Mqtt.Tests\Daikin2Mqtt.Tests.csproj", "{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}.Debug|x64.Build.0 = Debug|Any CPU
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}.Debug|x86.Build.0 = Debug|Any CPU
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}.Release|x64.ActiveCfg = Release|Any CPU
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}.Release|x64.Build.0 = Release|Any CPU
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}.Release|x86.ActiveCfg = Release|Any CPU
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA}.Release|x86.Build.0 = Release|Any CPU
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}.Debug|x64.Build.0 = Debug|Any CPU
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}.Debug|x86.Build.0 = Debug|Any CPU
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}.Release|x64.ActiveCfg = Release|Any CPU
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}.Release|x64.Build.0 = Release|Any CPU
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}.Release|x86.ActiveCfg = Release|Any CPU
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{23EA0AD9-0DF0-41AC-8B36-1D042DCC9CFA} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{DB5ECDC2-7C1C-450A-9963-BA0037BE771F} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+	EndGlobalSection
+EndGlobal
