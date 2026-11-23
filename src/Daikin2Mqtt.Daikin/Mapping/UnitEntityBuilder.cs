@@ -328,7 +328,7 @@ public sealed partial class UnitEntityBuilder
 
         return new MappedEntity(
             key,
-            new ComponentDescriptor { Key = key, Platform = "climate", UniqueId = $"{NodeIdOf(unit.Id)}_{key}", Name = name, Extra = extra },
+            new ComponentDescriptor { Key = key, Platform = "climate", UniqueId = $"{NodeIdOf(unit.Id)}_{key}", Name = name, Icon = "mdi:sun-snowflake-variant", Extra = extra },
             states,
             commands);
     }

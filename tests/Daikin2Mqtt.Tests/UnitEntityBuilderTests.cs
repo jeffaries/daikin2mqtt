@@ -184,6 +184,10 @@ public class UnitEntityBuilderTests
     }
 
     [Fact]
+    public void Climate_HasAFixedIcon() =>
+        Assert.Equal("mdi:sun-snowflake-variant", (string?)Discovery(Builder().Build(Info()), "climate")["icon"]);
+
+    [Fact]
     public void Climate_PresetModesDoNotListNone()
     {
         var presets = Discovery(Builder().Build(Info()), "climate")["preset_modes"]!.AsArray().Select(n => (string)n!);
